@@ -1,0 +1,17 @@
+bandit
+black
+coverage
+flake8
+flake8-junit-report
+isort
+mypy
+pycodestyle
+pydocstyle
+pyflakes
+pytest
+pytest-cov
+pytest-asyncio
+python-dateutil
+pytest-django
+types-python-dateutil
+types-requests
