@@ -1,0 +1,9 @@
+# apps/patients/admin.py
+from django.contrib import admin
+from .models import Patient
+
+
+@admin.register(Patient)
+class PatientAdmin(admin.ModelAdmin):
+    list_display = ('ipp', 'last_name', 'first_name', 'birth_date')
+    search_fields = ('ipp', 'last_name', 'first_name')
