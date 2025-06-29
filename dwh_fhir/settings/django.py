@@ -1,3 +1,4 @@
+# fhir-interview-test-main/dwh_fhir/settings/django.py
 """
 Django settings for dwh_fhir project.
 
@@ -11,15 +12,16 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 import os
-
 from dwh_fhir.utils import boolenv
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv(
     "DJANGO_SECRET_KEY",
     "django-insecure-8@=g68)+^8vey3-4jx==mt!)x)bgaasbg^&94-m_jbo4ua^j8+",
 )
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = boolenv("DJANGO_DEBUG", False)
@@ -29,10 +31,14 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,host.dock
 
 # Application definition
 DJANGO_APPS = [
+    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
 ]
+
 THIRD_PARTY_APPS = [
     "django_extensions",
     "django_filters",
@@ -48,11 +54,31 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 MIDDLEWARE = [
     "django.contrib.admindocs.middleware.XViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+]
+
+# Configuration WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -118,3 +144,11 @@ LOGGING = {
         **{app: {"handlers": ["console", "debug_console"], "level": "INFO"} for app in PROJECT_APPS},
     },
 }
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+
+# En production seulement (DEBUG=False)
+if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
