@@ -140,8 +140,17 @@ LOGGING = {
             "formatter": "simple",
         },
     },
-    "loggers": {
-        **{app: {"handlers": ["console", "debug_console"], "level": "INFO"} for app in PROJECT_APPS},
+    'loggers': {
+        **{app: {"handlers": ["console", "debug_console"], "level": "DEBUG"} for app in PROJECT_APPS},
+        'django': {
+            'handlers': ['console', 'debug_console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+        },
+        'django.request': {
+            'handlers': ['console', 'debug_console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
 
@@ -158,6 +167,7 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
