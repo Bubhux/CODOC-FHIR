@@ -1,1 +1,112 @@
 <!-- apps/patients/templates/patients/patient_detail.html-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Patient {{ patient.name.0.family }} {{ patient.name.0.given.0 }} ID N°{{ patient.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #8a8a8a;
+            color: #e6e6e6;
+        }
+
+        h1 {
+            color: #f2f2f2;
+            background-color: #5a5a5a;
+            padding: 15px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .patient-info {
+            background: #5a5a5a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #aad4ff;
+        }
+
+        h2 {
+            color: #ffffff;
+            border-bottom: 1px solid #7a7a7a;
+            padding-bottom: 5px;
+        }
+
+        a {
+            color: #aad4ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .patient-actions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #5a5a5a;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Patient {{ patient.name.0.family }} {{ patient.name.0.given.0 }} ID N°{{ patient.id }}</h1>
+
+    <div class="patient-info">
+        <div class="section">
+            <h2>Informations de base</h2>
+            <p><span class="label">Nom complet :</span> {{ patient.name.0.family }} {{ patient.name.0.given.0 }}</p>
+            <p><span class="label">Genre :</span>
+                {% if patient.gender == 'male' %}Masculin
+                {% elif patient.gender == 'female' %}Féminin
+                {% else %}Autre{% endif %}
+            </p>
+            <p><span class="label">Date de naissance :</span> {{ patient.birthDate|date:"d/m/Y" }}</p>
+            {% if patient.deceasedDateTime %}
+            <p><span class="label">Décédé le :</span> {{ patient.deceasedDateTime|date:"d/m/Y à H:i" }}</p>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h2>Coordonnées</h2>
+            {% if patient.telecom.0.value %}
+            <p><span class="label">Téléphone :</span> {{ patient.telecom.0.value }}</p>
+            {% endif %}
+            {% if patient.address.0.text %}
+            <p><span class="label">Adresse :</span>
+                {{ patient.address.0.text }}<br>
+                {{ patient.address.0.postalCode }} {{ patient.address.0.city }}<br>
+                {{ patient.address.0.country }}
+            </p>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h2>Identifiants</h2>
+            <p><span class="label">IPP :</span> {{ patient.identifier.0.value }}</p>
+            <p><span class="label">ID Patient :</span> {{ patient.id }}</p>
+        </div>
+    </div>
+
+    <div class="patient-actions">
+        <a href="/Patient/">Retour à la liste des patients</a>
+    </div>
+</body>
+
+</html>
