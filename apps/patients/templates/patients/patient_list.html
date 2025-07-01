@@ -1,1 +1,118 @@
 <!-- apps/patients/templates/patients/patient_list.html-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Patients</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #8a8a8a;
+            color: #e6e6e6;
+        }
+
+        h1 {
+            color: #f2f2f2;
+            background-color: #5a5a5a;
+            padding: 15px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #5a5a5a;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #7a7a7a;
+        }
+
+        th {
+            background-color: #4a4a4a;
+            color: #ffffff;
+        }
+
+        tr:hover {
+            background-color: #6a6a6a;
+        }
+
+        a {
+            color: #aad4ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .active {
+            color: #7cff7c;
+        }
+
+        .inactive {
+            color: #ff7c7c;
+        }
+
+        .patient-actions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #5a5a5a;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Liste des Patients ({{ patients|length }})</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Genre</th>
+                <th>Date de naissance</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.id }}</td>
+                <td>{{ patient.name.0.family }}, {{ patient.name.0.given.0 }}</td>
+                <td>
+                    {% if patient.gender == 'male' %}Masculin
+                    {% elif patient.gender == 'female' %}Féminin
+                    {% else %}Autre{% endif %}
+                </td>
+                <td>{{ patient.birthDate|date:"d/m/Y" }}</td>
+                <td class="{% if patient.active %}active{% else %}inactive{% endif %}">
+                    {% if patient.active %}Actif{% else %}Inactif{% endif %}
+                </td>
+                <td>
+                    <a href="/Patient/{{ patient.id }}/">Détails</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="patient-actions">
+        <a href="/Patient/new/">Ajouter un nouveau patient</a> |
+        <a href="/Patient/">Retour à l'accueil</a>
+    </div>
+</body>
+
+</html>
