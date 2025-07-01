@@ -9,9 +9,21 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
     active = serializers.BooleanField(default=True, read_only=True)
     gender = serializers.SerializerMethodField()
     deceasedDateTime = serializers.DateTimeField(source='death_date', allow_null=True)
-    birthDate = serializers.DateField(source='birth_date', allow_null=True)
+    birthDate = serializers.SerializerMethodField()
+
+    # Ajout des champs comme SerializerMethodField pour les champs FHIR qui n'ont pas de correspondance directe
+    identifier = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    telecom = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
     maritalStatus = serializers.SerializerMethodField()
     multipleBirthBoolean = serializers.SerializerMethodField()
+    photo = serializers.SerializerMethodField()
+    contact = serializers.SerializerMethodField()
+    communication = serializers.SerializerMethodField()
+    generalPractitioner = serializers.SerializerMethodField()
+    managingOrganization = serializers.SerializerMethodField()
+    link = serializers.SerializerMethodField()
 
     class Meta:
         model = Patient
@@ -22,6 +34,11 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
             'generalPractitioner', 'managingOrganization', 'link'
         ]
 
+    def get_birthDate(self, obj):
+        if obj.birth_date:
+            return obj.birth_date.date()  # Convert datetime to date
+        return None
+
     def get_gender(self, obj):
         gender_mapping = {
             'M': 'male',
@@ -31,74 +48,92 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
         }
         return gender_mapping.get(obj.sex, 'unknown')
 
-    def get_maritalStatus(self, obj):
-        # Le modèle ne contient pas cette information, donc on retourne None
-        return None
+    def get_identifier(self, obj):
+        return [{
+            "system": "urn:oid:1.2.250.1.213.1.4.8",
+            "value": obj.ipp
+        }]
 
-    def get_multipleBirthBoolean(self, obj):
-        # Le modèle ne contient pas cette information, donc on retourne None
-        return None
+    def get_name(self, obj):
+        return [{
+            "use": "official",
+            "family": obj.last_name,
+            "given": [obj.first_name] if obj.first_name else [],
+            "prefix": [],
+            "suffix": []
+        }]
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
+    def get_telecom(self, obj):
+        return [{
+            "system": "phone",
+            "value": obj.phone_number,
+            "use": "home"
+        }] if obj.phone_number else []
 
-        # Construction de la structure FHIR complète
-        fhir_patient = {
-            "resourceType": "Patient",
-            "id": str(instance.pk),
-            "meta": {
-                "versionId": "1",
-                "lastUpdated": instance.update_date.isoformat() if instance.update_date else None
-            },
-            "identifier": [{
-                "system": "urn:oid:1.2.250.1.213.1.4.8",  # OID français pour le numéro IPP
-                "value": instance.ipp
-            }],
-            "active": True,  # Par défaut, on considère le patient comme actif
-            "name": [{
-                "use": "official",
-                "family": instance.last_name,
-                "given": [instance.first_name] if instance.first_name else [],
-                "prefix": [],
-                "suffix": []
-            }],
-            "telecom": [{
-                "system": "phone",
-                "value": instance.phone_number,
-                "use": "home"
-            }] if instance.phone_number else [],
-            "gender": self.get_gender(instance),
-            "birthDate": instance.birth_date.date().isoformat() if instance.birth_date else None,
-            "deceasedDateTime": instance.death_date.isoformat() if instance.death_date else None,
-            "address": [{
+    def get_address(self, obj):
+        if any([obj.residence_address, obj.residence_city, obj.residence_zip_code, obj.residence_country]):
+            return [{
                 "use": "home",
                 "type": "both",
-                "text": instance.residence_address,
-                "line": [instance.residence_address] if instance.residence_address else [],
-                "city": instance.residence_city,
+                "text": obj.residence_address,
+                "line": [obj.residence_address] if obj.residence_address else [],
+                "city": obj.residence_city,
                 "district": "",
                 "state": "",
-                "postalCode": instance.residence_zip_code,
-                "country": instance.residence_country,
-                "period": {
-                    "start": ""
-                },
+                "postalCode": obj.residence_zip_code,
+                "country": obj.residence_country,
+                "period": {"start": ""},
                 "extension": [{
                     "url": "http://hl7.org/fhir/StructureDefinition/geolocation",
                     "extension": [
                         {
                             "url": "latitude",
-                            "valueDecimal": float(instance.residence_latitude) if instance.residence_latitude else None
+                            "valueDecimal": float(obj.residence_latitude) if obj.residence_latitude else None
                         },
                         {
                             "url": "longitude",
-                            "valueDecimal": float(instance.residence_longitude) if instance.residence_longitude else None
+                            "valueDecimal": float(obj.residence_longitude) if obj.residence_longitude else None
                         }
                     ]
-                }] if instance.residence_latitude and instance.residence_longitude else []
-            }] if any([instance.residence_address, instance.residence_city,
-                       instance.residence_zip_code, instance.residence_country]) else [],
-            "extension": [{
+                }] if obj.residence_latitude and obj.residence_longitude else []
+            }]
+        return []
+
+    def get_maritalStatus(self, obj):
+        return None
+
+    def get_multipleBirthBoolean(self, obj):
+        return None
+
+    def get_photo(self, obj):
+        return None
+
+    def get_contact(self, obj):
+        return []
+
+    def get_communication(self, obj):
+        return []
+
+    def get_generalPractitioner(self, obj):
+        return []
+
+    def get_managingOrganization(self, obj):
+        return None
+
+    def get_link(self, obj):
+        return []
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # Ajoutez les éléments FHIR qui nécessitent une structure particulière
+        representation['meta'] = {
+            "versionId": "1",
+            "lastUpdated": instance.update_date.isoformat() if instance.update_date else None
+        }
+
+        if instance.birth_city or instance.birth_country:
+            representation['extension'] = [{
                 "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
                 "valueAddress": {
                     "city": instance.birth_city,
@@ -118,8 +153,7 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
                         ]
                     }] if instance.birth_latitude is not None and instance.birth_longitude is not None else []
                 }
-            }] if instance.birth_city or instance.birth_country else []
-        }
+            }]
 
         # Nettoyage des valeurs None
         def remove_none_values(data):
@@ -130,7 +164,7 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
             else:
                 return data
 
-        return remove_none_values(fhir_patient)
+        return remove_none_values(representation)
 
     def to_internal_value(self, data):
         fhir_data = data.copy()
