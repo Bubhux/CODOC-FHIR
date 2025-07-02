@@ -76,6 +76,11 @@
 <body>
     <h1>Liste des Patients ({{ patients|length }})</h1>
 
+    <div class="patient-actions">
+        <a href="/Patient/new/">Ajouter un nouveau patient</a> |
+        <a href="/Patient/">Retour à l'accueil</a>
+    </div>
+
     <table>
         <thead>
             <tr>
@@ -109,10 +114,6 @@
         </tbody>
     </table>
 
-    <div class="patient-actions">
-        <a href="/Patient/new/">Ajouter un nouveau patient</a> |
-        <a href="/Patient/">Retour à l'accueil</a>
-    </div>
 </body>
 
 </html>

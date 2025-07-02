@@ -31,7 +31,7 @@
 
         .section {
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 15px;
             background-color: #4a4a4a;
             border-radius: 5px;
         }
@@ -39,12 +39,15 @@
         .label {
             font-weight: bold;
             color: #aad4ff;
+            display: inline-block;
+            min-width: 200px;
         }
 
         h2 {
             color: #ffffff;
             border-bottom: 1px solid #7a7a7a;
             padding-bottom: 5px;
+            margin-top: 0;
         }
 
         a {
@@ -62,50 +65,196 @@
             background-color: #5a5a5a;
             border-radius: 5px;
         }
+
+        .row {
+            margin-bottom: 8px;
+        }
+
+        .coordinates {
+            display: flex;
+            gap: 20px;
+        }
+
+        .coordinates>div {
+            flex: 1;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
     </style>
 </head>
 
 <body>
     <h1>Patient {{ patient.name.0.family }} {{ patient.name.0.given.0 }} ID N°{{ patient.id }}</h1>
 
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="patient-info">
+        <!-- Section Informations de base -->
         <div class="section">
             <h2>Informations de base</h2>
-            <p><span class="label">Nom complet :</span> {{ patient.name.0.family }} {{ patient.name.0.given.0 }}</p>
-            <p><span class="label">Genre :</span>
+            <div class="row">
+                <span class="label">IPP :</span> {{ patient.identifier.0.value }}
+            </div>
+            <div class="row">
+                <span class="label">Nom complet :</span> {{ patient.name.0.family }} {{ patient.name.0.given.0 }}
+            </div>
+            {% if patient.name.0.maiden %}
+            <div class="row">
+                <span class="label">Nom de jeune fille :</span> {{ patient.name.0.maiden }}
+            </div>
+            {% endif %}
+            <div class="row">
+                <span class="label">Genre :</span>
                 {% if patient.gender == 'male' %}Masculin
                 {% elif patient.gender == 'female' %}Féminin
                 {% else %}Autre{% endif %}
-            </p>
-            <p><span class="label">Date de naissance :</span> {{ patient.birthDate|date:"d/m/Y" }}</p>
+            </div>
+            <div class="row">
+                <span class="label">Date de naissance :</span> {{ patient.birthDate }}
+            </div>
             {% if patient.deceasedDateTime %}
-            <p><span class="label">Décédé le :</span> {{ patient.deceasedDateTime|date:"d/m/Y à H:i" }}</p>
+            <div class="row">
+                <span class="label">Décédé le :</span> {{ patient.deceasedDateTime }}
+            </div>
+            {% if patient.extension %}
+            {% for ext in patient.extension %}
+            {% if ext.url == 'http://hl7.org/fhir/StructureDefinition/patient-deathCause' %}
+            <div class="row">
+                <span class="label">Cause de décès :</span> {{ ext.valueCodeableConcept.coding.0.code }}
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
             {% endif %}
         </div>
 
+        <!-- Section Coordonnées -->
         <div class="section">
             <h2>Coordonnées</h2>
-            {% if patient.telecom.0.value %}
-            <p><span class="label">Téléphone :</span> {{ patient.telecom.0.value }}</p>
+            {% if patient.telecom and patient.telecom.0.value %}
+            <div class="row">
+                <span class="label">Téléphone :</span> {{ patient.telecom.0.value }}
+            </div>
             {% endif %}
-            {% if patient.address.0.text %}
-            <p><span class="label">Adresse :</span>
-                {{ patient.address.0.text }}<br>
-                {{ patient.address.0.postalCode }} {{ patient.address.0.city }}<br>
-                {{ patient.address.0.country }}
-            </p>
+
+            {% if patient.address and patient.address.0 %}
+            <div class="row">
+                <span class="label">Adresse :</span>
+                {% if patient.address.0.line and patient.address.0.line.0 %}
+                {{ patient.address.0.line.0 }}
+                {% endif %}
+            </div>
+            {% if patient.address.0.postalCode %}
+            <div class="row">
+                <span class="label">Code postal :</span> {{ patient.address.0.postalCode }}
+            </div>
+            {% endif %}
+            {% if patient.address.0.city %}
+            <div class="row">
+                <span class="label">Ville :</span> {{ patient.address.0.city }}
+            </div>
+            {% endif %}
+            {% if patient.address.0.country %}
+            <div class="row">
+                <span class="label">Pays :</span> {{ patient.address.0.country }}
+            </div>
+            {% endif %}
+
+            {% if patient.address.0.extension %}
+            <div class="coordinates">
+                <div>
+                    <span class="label">Latitude :</span>
+                    {{ patient.address.0.extension.0.extension.0.valueDecimal|floatformat:6 }}
+                </div>
+                <div>
+                    <span class="label">Longitude :</span>
+                    {{ patient.address.0.extension.0.extension.1.valueDecimal|floatformat:6 }}
+                </div>
+            </div>
+            {% endif %}
             {% endif %}
         </div>
 
+        <!-- Section Lieu de naissance -->
         <div class="section">
-            <h2>Identifiants</h2>
-            <p><span class="label">IPP :</span> {{ patient.identifier.0.value }}</p>
-            <p><span class="label">ID Patient :</span> {{ patient.id }}</p>
+            <h2>Lieu de naissance</h2>
+            {% if patient.extension %}
+            {% for ext in patient.extension %}
+            {% if ext.url == 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' %}
+            {% if ext.valueAddress.city %}
+            <div class="row">
+                <span class="label">Ville :</span> {{ ext.valueAddress.city }}
+            </div>
+            {% endif %}
+            {% if ext.valueAddress.postalCode %}
+            <div class="row">
+                <span class="label">Code postal :</span> {{ ext.valueAddress.postalCode }}
+            </div>
+            {% endif %}
+            {% if ext.valueAddress.country %}
+            <div class="row">
+                <span class="label">Pays :</span> {{ ext.valueAddress.country }}
+            </div>
+            {% endif %}
+            {% if ext.valueAddress.extension %}
+            <div class="coordinates">
+                <div>
+                    <span class="label">Latitude :</span>
+                    {{ ext.valueAddress.extension.0.extension.0.valueDecimal|floatformat:6 }}
+                </div>
+                <div>
+                    <span class="label">Longitude :</span>
+                    {{ ext.valueAddress.extension.0.extension.1.valueDecimal|floatformat:6 }}
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Section Métadonnées -->
+        <div class="section">
+            <h2>Métadonnées</h2>
+            <div class="row">
+                <span class="label">ID Patient :</span> {{ patient.id }}
+            </div>
+            {% if patient.meta and patient.meta.lastUpdated %}
+            <div class="row">
+                <span class="label">Dernière mise à jour :</span>
+                {{ patient.meta.lastUpdated }}
+            </div>
+            {% endif %}
+            {% if patient.coordinates %}
+            <div class="row">
+                <span class="label">Coordonnées complètes :</span> {{ patient.coordinates }}
+            </div>
+            {% endif %}
         </div>
     </div>
 
     <div class="patient-actions">
-        <a href="/Patient/">Retour à la liste des patients</a>
+        <a href="/Patient/">Retour à la liste des patients</a> |
+        <a href="/Patient/{{ patient.id }}/edit/">Modifier</a>
     </div>
 </body>
 
