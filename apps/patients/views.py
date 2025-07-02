@@ -1,5 +1,5 @@
 # apps/patients/views.py
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,6 +13,17 @@ class PatientList(APIView):
     def get(self, request, format=None):
         patients = Patient.objects.all()
         serializer = PatientFHIRSerializer(patients, many=True)
+
+        # Si HTML demandé
+        if request.accepted_renderer.format == 'html' or 'text/html' in request.headers.get('Accept', ''):
+            return render(
+                request,
+                'patients/patient_list.html',
+                {'patients': serializer.data},
+                content_type='text/html'
+            )
+
+        # Sinon retourner JSON
         return Response(serializer.data)
 
     def post(self, request, format=None):
@@ -68,11 +79,11 @@ class PatientDetail(APIView):
     def get(self, request, pk, format=None):
         patient = self.get_object(pk)
         serializer = PatientFHIRSerializer(patient)
-        
+
         # Si le client accepte HTML, renvoyer le template
         if request.accepted_renderer.format == 'html' or 'text/html' in request.headers.get('Accept', ''):
             return render(request, 'patients/patient_detail.html', {'patient': serializer.data})
-        
+
         # Sinon, renvoyer le JSON habituel
         return Response(serializer.data)
 
