@@ -8,6 +8,8 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.http import HttpResponseNotAllowed
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
+from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date, parse_datetime
 from datetime import datetime
 
 from .models import Patient
@@ -156,7 +158,7 @@ class PatientMixin:
 
         # Décès
         death_code = form_data.get('death_code')
-        death_date = form_data.get('death_date')
+        death_date = form_data.get('deceasedDateTime')
 
         if death_code:
             fhir_data['extension'].append({
@@ -170,6 +172,12 @@ class PatientMixin:
             })
 
         if death_date:
+            # Convertir le format datetime-local en format ISO pour FHIR
+            try:
+                death_date = datetime.strptime(death_date, '%Y-%m-%dT%H:%M').isoformat()
+            except (ValueError, TypeError):
+                pass
+                
             fhir_data['extension'].append({
                 'url': 'http://hl7.org/fhir/StructureDefinition/patient-deathDate',
                 'valueDateTime': death_date
@@ -193,26 +201,24 @@ class PatientList(APIView, PatientMixin):
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, format=None):
-        patients = Patient.objects.all()
-        serializer = PatientFHIRSerializer(patients, many=True)
+        patients = Patient.objects.all().order_by('id')
+        paginator = Paginator(patients, 15)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        serializer = PatientFHIRSerializer(page_obj, many=True)
 
         if ('new' in request.path or
             request.accepted_renderer.format == 'html' or
                 'text/html' in request.headers.get('Accept', '')):
 
             if 'new' in request.path:
-                return render(
-                    request,
-                    'patients/patient_create.html',
-                    {},
-                    content_type='text/html'
-                )
+                return render(request, 'patients/patient_create.html', {})
 
             return render(
                 request,
                 'patients/patient_list.html',
-                {'patients': serializer.data},
-                content_type='text/html'
+                {'patients': serializer.data, 'page_obj': page_obj}
             )
 
         return Response(serializer.data)
@@ -286,6 +292,10 @@ class PatientDetail(APIView, PatientMixin):
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
+        request = args[0]
+        # Gestion de la suppression via formulaire HTML
+        if request.method == 'POST' and request.POST.get('_method') == 'DELETE':
+            return self.delete(*args, **kwargs)
         return super().dispatch(*args, **kwargs)
 
     def get_object(self, pk):
@@ -311,8 +321,30 @@ class PatientDetail(APIView, PatientMixin):
             fhir_data = request.data
 
         serializer = PatientFHIRSerializer(patient, data=fhir_data)
+
+        if 'birthDate' in request.data:
+            try:
+                birth_date = serializer.parse_date(request.data['birthDate'])
+                request.data['birthDate'] = birth_date.isoformat() if birth_date else None
+            except (ValueError, TypeError, AttributeError):
+                return Response(
+                    {"error": "Invalid date format for birthDate. Use YYYY-MM-DD"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        if 'deceasedDateTime' in request.data:
+            try:
+                death_date = serializer.parse_datetime(request.data['deceasedDateTime'])
+                request.data['deceasedDateTime'] = death_date.isoformat() if death_date else None
+            except (ValueError, TypeError, AttributeError):
+                return Response(
+                    {"error": "Invalid datetime format for deceasedDateTime. Use YYYY-MM-DDTHH:MM:SS"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         if serializer.is_valid():
             updated_patient = serializer.save()
+            updated_patient.refresh_from_db()
 
             if request.accepted_renderer.format == 'html':
                 messages.success(request, 'Patient mis à jour avec succès')
@@ -362,5 +394,13 @@ class PatientDetail(APIView, PatientMixin):
 
     def delete(self, request, pk, format=None):
         patient = self.get_object(pk)
+
+        full_name = f"{patient.last_name} {patient.first_name}" if patient.last_name and patient.first_name else f"Patient ID {patient.id}"
+
         patient.delete()
+
+        if 'text/html' in request.headers.get('Accept', '') or request.content_type == 'application/x-www-form-urlencoded':
+            messages.success(request, f'Le patient {full_name} a été supprimé avec succès.')
+            return redirect('patients:patient-list')
+
         return Response(status=status.HTTP_204_NO_CONTENT)
