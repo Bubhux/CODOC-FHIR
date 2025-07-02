@@ -2,7 +2,8 @@
 from rest_framework import serializers
 from .models import Patient
 from datetime import datetime
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, make_aware
+from django.utils.dateparse import parse_date, parse_datetime
 
 
 class PatientFHIRSerializer(serializers.ModelSerializer):
@@ -222,6 +223,42 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
 
         return clean_data(representation)
 
+    def parse_date(self, date_str):
+        """Convertit une chaîne de date en objet date avec fuseau horaire"""
+        if not date_str:
+            return None
+        try:
+            date = parse_date(date_str) or datetime.strptime(date_str, '%Y-%m-%d').date()
+            return make_aware(datetime.combine(date, datetime.min.time()))
+        except (ValueError, TypeError, AttributeError):
+            return None
+
+    def parse_datetime(self, datetime_str):
+        """Convertit une chaîne datetime en objet datetime avec fuseau horaire"""
+        if not datetime_str:
+            return None
+        try:
+            dt = parse_datetime(datetime_str) or datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S')
+            return make_aware(dt) if dt else None
+        except (ValueError, TypeError, AttributeError):
+            return None
+
+    def extract_death_date(self, extensions):
+        """Extrait la date de décès des extensions FHIR"""
+        if not extensions:
+            return None
+        for ext in extensions:
+            if ext.get('url') == 'http://hl7.org/fhir/StructureDefinition/patient-deathDate':
+                return ext.get('valueDateTime')
+        return None
+
+    def get_deceasedDateTime(self, obj):
+        if isinstance(obj.death_date, str):
+            return obj.death_date
+        elif obj.death_date:
+            return obj.death_date.strftime('%d/%m/%Y à %H:%M')
+        return None
+
     def to_internal_value(self, data):
         internal_value = {
             'ipp': next(
@@ -232,14 +269,14 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
             'last_name': data.get('name', [{}])[0].get('family'),
             'first_name': data.get('name', [{}])[0].get('given', [None])[0],
             'maiden_name': data.get('name', [{}])[0].get('maiden'),
-            'birth_date': data.get('birthDate'),
+            'birth_date': self.parse_date(data.get('birthDate')),
             'sex': data.get('gender', '').upper() if isinstance(data.get('gender'), str) else 'O',
             'phone_number': next(
                 (t['value'] for t in data.get('telecom', [])
                  if t.get('system') == 'phone'),
                 None
             ),
-            'death_date': data.get('deceasedDateTime') or data.get('death_date'),
+            'death_date': self.parse_datetime(data.get('deceasedDateTime') or self.extract_death_date(data.get('extension'))),
             'death_code': None,
         }
 
@@ -284,10 +321,14 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
                                         internal_value['birth_longitude'] = str(geo_ext.get('valueDecimal')).replace(',', '.')
 
                 # Cause de décès
-                if ext.get('url') == 'http://hl7.org/fhir/StructureDefinition/patient-deathCause':
-                    coding = ext.get('valueCodeableConcept', {}).get('coding', [{}])[0]
-                    internal_value['death_code'] = coding.get('code')
-                elif ext.get('url') == 'http://hl7.org/fhir/StructureDefinition/patient-deathDate':
-                    internal_value['death_date'] = ext.get('valueDateTime')
+                if data.get('extension'):
+                    for ext in data['extension']:
+                        # Cause de décès
+                        if ext.get('url') == 'http://hl7.org/fhir/StructureDefinition/patient-deathCause':
+                            coding = ext.get('valueCodeableConcept', {}).get('coding', [{}])[0]
+                            internal_value['death_code'] = coding.get('code')
+                        # Date de décès
+                        elif ext.get('url') == 'http://hl7.org/fhir/StructureDefinition/patient-deathDate':
+                            internal_value['death_date'] = ext.get('valueDateTime')
 
         return {k: v for k, v in internal_value.items() if v is not None}

@@ -47,6 +47,41 @@
             border-radius: 5px;
         }
 
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        input[type="datetime-local"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #7a7a7a;
+            border-radius: 4px;
+            background-color: #6a6a6a;
+            color: #e6e6e6;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #4a4a4a;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #6a6a6a;
+        }
+
         .form-section {
             margin-bottom: 25px;
             padding: 15px;
@@ -60,10 +95,30 @@
         }
 
         .patient-actions {
-            margin-top: 20px;
+            margin: 20px 0;
             padding: 15px;
             background-color: #5a5a5a;
             border-radius: 5px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .patient-actions a {
+            display: inline-block;
+            padding: 6px 20px;
+            background-color: #4a4a4a;
+            color: #f2f2f2;
+            text-decoration: none;
+            border: 1px solid #6a6a6a;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .patient-actions a:hover {
+            background-color: #6a6a6a;
+            text-decoration: none;
         }
 
         .death-info {
@@ -105,27 +160,6 @@
             font-size: 0.9rem;
         }
 
-        input[type="text"],
-        input[type="date"],
-        input[type="number"],
-        input[type="datetime-local"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #7a7a7a;
-            border-radius: 4px;
-            background-color: #6a6a6a;
-            color: #e6e6e6;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-
-        textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
         .form-input {
             width: 25%;
             padding: 10px 15px;
@@ -155,26 +189,6 @@
             color: #6c757d;
             pointer-events: none;
         }
-
-        button {
-            background-color: #4a4a4a;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-
-        button:hover {
-            background-color: #6a6a6a;
-        }
-
-        .error {
-            color: #ff7c7c;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
     </style>
 </head>
 
@@ -182,9 +196,10 @@
     <h1>Créer un nouveau Patient</h1>
 
     <div class="patient-actions">
-        <a href="/Patient/">Retour à la liste des patients</a>
+        <a href="/Patient/">
+            <i class="fas fa-arrow-left"></i> Retour à la liste des patients
+        </a>
     </div>
-
     <form method="post">
         {% csrf_token %}
 
@@ -291,14 +306,14 @@
         <!-- Section Décès -->
         <div class="form-section death-info">
             <h2 class="section-title">Informations de décès</h2>
-        
+
             <div class="form-row">
                 <div class="form-group code-group">
                     <label for="death_code" class="input-label">Code décès</label>
                     <input type="text" id="death_code" name="death_code" maxlength="2" 
                            class="form-input code-input">
                 </div>
-        
+
                 <div class="form-group datetime-group">
                     <label for="death_date" class="input-label">Date et heure</label>
                     <div class="datetime-input-container">
@@ -316,12 +331,12 @@
 
             <div class="form-group">
                 <label for="residence_latitude">Latitude résidence:</label>
-                <input type="text" id="residence_latitude" name="residence_latitude">
+                <input type="number" id="residence_latitude" name="residence_latitude">
             </div>
 
             <div class="form-group">
                 <label for="residence_longitude">Longitude résidence:</label>
-                <input type="text" id="residence_longitude" name="residence_longitude">
+                <input type="number" id="residence_longitude" name="residence_longitude">
             </div>
         </div>
 

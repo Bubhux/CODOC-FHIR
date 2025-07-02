@@ -65,10 +65,73 @@
         }
 
         .patient-actions {
-            margin-top: 20px;
+            margin: 20px 0;
             padding: 15px;
             background-color: #5a5a5a;
             border-radius: 5px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .patient-actions a {
+            display: inline-block;
+            padding: 6px 20px;
+            background-color: #4a4a4a;
+            color: #f2f2f2;
+            text-decoration: none;
+            border: 1px solid #6a6a6a;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .patient-actions a:hover {
+            background-color: #6a6a6a;
+            text-decoration: none;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            color: black;
+            padding: 8px 16px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            margin: 0 4px;
+        }
+
+        .pagination a.active {
+            background-color: #646464;
+            color: white;
+            border: 1px solid #ddd;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+
+        .pagination a.disabled {
+            pointer-events: none;
+            color: #aaa;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
@@ -76,15 +139,26 @@
 <body>
     <h1>Liste des Patients ({{ patients|length }})</h1>
 
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div role="alert" class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="patient-actions">
-        <a href="/Patient/new/">Ajouter un nouveau patient</a> |
-        <a href="/Patient/">Retour à l'accueil</a>
+        <a href="/Patient/new/">
+            <i class="fas fa-arrow-left"></i> Ajouter un nouveau patient
+        </a>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>ID</th>
+                <th>IPP</th>
                 <th>Nom</th>
                 <th>Genre</th>
                 <th>Date de naissance</th>
@@ -95,14 +169,14 @@
         <tbody>
             {% for patient in patients %}
             <tr>
-                <td>{{ patient.id }}</td>
+                <td>{{ patient.identifier.0.value }}</td>
                 <td>{{ patient.name.0.family }}, {{ patient.name.0.given.0 }}</td>
                 <td>
                     {% if patient.gender == 'male' %}Masculin
                     {% elif patient.gender == 'female' %}Féminin
                     {% else %}Autre{% endif %}
                 </td>
-                <td>{{ patient.birthDate|date:"d/m/Y" }}</td>
+                <td>{{ patient.birthDate }}</td>
                 <td class="{% if patient.active %}active{% else %}inactive{% endif %}">
                     {% if patient.active %}Actif{% else %}Inactif{% endif %}
                 </td>
@@ -113,6 +187,32 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; Première</a>
+            <a href="?page={{ page_obj.previous_page_number }}">Précédente</a>
+        {% else %}
+            <a class="disabled">&laquo; Première</a>
+            <a class="disabled">Précédente</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <a class="active">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Suivante</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Dernière &raquo;</a>
+        {% else %}
+            <a class="disabled">Suivante</a>
+            <a class="disabled">Dernière &raquo;</a>
+        {% endif %}
+    </div>
 
 </body>
 
