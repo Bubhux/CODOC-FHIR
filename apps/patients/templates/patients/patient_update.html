@@ -1,0 +1,293 @@
+<!-- apps/patients/templates/patients/patient_update.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier Patient {{ patient.name.0.family }} {{ patient.name.0.given.0 }} ID N°{{ patient.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #8a8a8a;
+            color: #e6e6e6;
+        }
+
+        h1 {
+            color: #f2f2f2;
+            background-color: #5a5a5a;
+            padding: 15px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .patient-info {
+            background: #5a5a5a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #aad4ff;
+            display: inline-block;
+            min-width: 200px;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            color: #ffffff;
+            border-bottom: 1px solid #7a7a7a;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+
+        a {
+            color: #aad4ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .patient-actions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #5a5a5a;
+            border-radius: 5px;
+        }
+
+        .row {
+            margin-bottom: 15px;
+        }
+
+        .coordinates {
+            display: flex;
+            gap: 20px;
+        }
+
+        .coordinates>div {
+            flex: 1;
+        }
+
+        input, select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #666;
+            background-color: #3a3a3a;
+            color: #e6e6e6;
+            width: 300px;
+        }
+
+        button {
+            background-color: #4a6ea9;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #5a7eb9;
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .messages {
+            padding: 10px;
+            margin: 10px 0;
+            list-style: none;
+        }
+        .messages .success {
+            color: #4CAF50;
+            background-color: #e8f5e9;
+            border: 1px solid #4CAF50;
+            padding: 10px;
+        }
+        .messages .error {
+            color: #f44336;
+            background-color: #ffebee;
+            border: 1px solid #f44336;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Modifier Patient {{ patient.name.0.family }} {{ patient.name.0.given.0 }} ID N°{{ patient.id }}</h1>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" action="/Patient/{{ patient.id }}/edit/">
+        {% csrf_token %}
+        <input type="hidden" name="_method" value="PUT">
+
+        <div class="patient-info">
+            <!-- Section Informations de base -->
+            <div class="section">
+                <h2>Informations de base</h2>
+                <div class="form-group">
+                    <div class="label">IPP :</div>
+                    <input type="text" name="identifier.0.value" value="{{ patient.identifier.0.value }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="label">Nom :</div>
+                    <input type="text" name="name.0.family" value="{{ patient.name.0.family }}" required>
+                </div>
+                <div class="form-group">
+                    <div class="label">Prénom :</div>
+                    <input type="text" name="name.0.given.0" value="{{ patient.name.0.given.0 }}" required>
+                </div>
+                {% if patient.name.0.maiden %}
+                <div class="form-group">
+                    <div class="label">Nom de jeune fille :</div>
+                    <input type="text" name="name.0.maiden" value="{{ patient.name.0.maiden }}">
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <div class="label">Genre :</div>
+                    <select name="gender" required>
+                        <option value="male" {% if patient.gender == 'male' %}selected{% endif %}>Masculin</option>
+                        <option value="female" {% if patient.gender == 'female' %}selected{% endif %}>Féminin</option>
+                        <option value="other" {% if patient.gender != 'male' and patient.gender != 'female' %}selected{% endif %}>Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="label">Date de naissance :</div>
+                    <input type="date" name="birthDate" value="{{ patient.birthDate }}" required>
+                </div>
+                {% if patient.deceasedDateTime %}
+                <div class="form-group">
+                    <div class="label">Décédé le :</div>
+                    <input type="datetime-local" name="deceasedDateTime" value="{{ patient.deceasedDateTime_formatted }}">
+                </div>
+                {% if patient.extension %}
+                    {% for ext in patient.extension %}
+                        {% if ext.url == 'http://hl7.org/fhir/StructureDefinition/patient-deathCause' %}
+                        <div class="form-group">
+                            <div class="label">Cause de décès :</div>
+                            <input type="text" name="death_code" value="{{ ext.valueCodeableConcept.coding.0.code }}">
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Section Coordonnées -->
+            <div class="section">
+                <h2>Coordonnées</h2>
+                {% if patient.telecom and patient.telecom.0.value %}
+                <div class="form-group">
+                    <div class="label">Téléphone :</div>
+                    <input type="tel" name="telecom.0.value" value="{{ patient.telecom.0.value }}">
+                </div>
+                {% endif %}
+
+                {% if patient.address and patient.address.0 %}
+                <div class="form-group">
+                    <div class="label">Adresse :</div>
+                    <input type="text" name="address.0.line.0" value="{{ patient.address.0.line.0 }}">
+                </div>
+                <div class="form-group">
+                    <div class="label">Code postal :</div>
+                    <input type="text" name="address.0.postalCode" value="{{ patient.address.0.postalCode }}">
+                </div>
+                <div class="form-group">
+                    <div class="label">Ville :</div>
+                    <input type="text" name="address.0.city" value="{{ patient.address.0.city }}">
+                </div>
+                <div class="form-group">
+                    <div class="label">Pays :</div>
+                    <input type="text" name="address.0.country" value="{{ patient.address.0.country }}">
+                </div>
+
+                {% if patient.address.0.extension %}
+                <div class="coordinates">
+                    <div class="form-group">
+                        <div class="label">Latitude :</div>
+                        <input type="number" step="0.000001" name="residence_latitude" 
+                            value="{{ patient.address.0.extension.0.extension.0.valueDecimal|stringformat:"0.6f" }}">
+                    </div>
+                    <div class="form-group">
+                        <div class="label">Longitude :</div>
+                        <input type="number" step="0.000001" name="residence_longitude" 
+                               value="{{ patient.address.0.extension.0.extension.1.valueDecimal|stringformat:"0.6f" }}">
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Section Lieu de naissance -->
+            <div class="section">
+                <h2>Lieu de naissance</h2>
+                {% if patient.extension %}
+                    {% for ext in patient.extension %}
+                        {% if ext.url == 'http://hl7.org/fhir/StructureDefinition/patient-birthPlace' %}
+                        <div class="form-group">
+                            <div class="label">Ville :</div>
+                            <input type="text" name="birth_city" value="{{ ext.valueAddress.city }}">
+                        </div>
+                        <div class="form-group">
+                            <div class="label">Code postal :</div>
+                            <input type="text" name="birth_zip_code" value="{{ ext.valueAddress.postalCode }}">
+                        </div>
+                        <div class="form-group">
+                            <div class="label">Pays :</div>
+                            <input type="text" name="birth_country" value="{{ ext.valueAddress.country }}">
+                        </div>
+                        {% if ext.valueAddress.extension %}
+                        <div class="coordinates">
+                            <div class="form-group">
+                                <div class="label">Latitude :</div>
+                                <input type="number" step="0.000001" name="birth_latitude" 
+                                       value="{{ ext.valueAddress.extension.0.extension.0.valueDecimal|stringformat:"0.6f" }}">
+                            </div>
+                            <div class="form-group">
+                                <div class="label">Longitude :</div>
+                                <input type="number" step="0.000001" name="birth_longitude" 
+                                       value="{{ ext.valueAddress.extension.0.extension.1.valueDecimal|stringformat:"0.6f" }}">
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="patient-actions">
+            <button type="submit">Enregistrer les modifications</button>
+            <a href="/Patient/{{ patient.id }}/">Annuler</a>
+        </div>
+    </form>
+</body>
+
+</html>

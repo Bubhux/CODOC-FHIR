@@ -1,0 +1,335 @@
+<!-- apps/patients/templates/patients/patient_create.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un nouveau Patient</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #8a8a8a;
+            color: #e6e6e6;
+        }
+
+        a {
+            color: #aad4ff;
+            text-decoration: none;
+        }
+
+        h1 {
+            color: #f2f2f2;
+            background-color: #5a5a5a;
+            padding: 15px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        h2 {
+            color: #f2f2f2;
+            margin-top: 0;
+            border-bottom: 1px solid #6a6a6a;
+            padding-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        form {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #5a5a5a;
+            border-radius: 5px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+        }
+
+        .form-actions {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .patient-actions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #5a5a5a;
+            border-radius: 5px;
+        }
+
+        .death-info {
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #6a6a6a;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: inline-block;
+            vertical-align: top;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            width: 48%;
+            padding-right: 10px;
+        }
+
+        .form-group.full-width {
+            width: 100%;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        input[type="datetime-local"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #7a7a7a;
+            border-radius: 4px;
+            background-color: #6a6a6a;
+            color: #e6e6e6;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-input {
+            width: 25%;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+        }
+
+        .code-input {
+            max-width: 80px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .datetime-input-container {
+            position: relative;
+        }
+
+        .datetime-input {
+            padding-right: 40px;
+        }
+
+        .datetime-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            pointer-events: none;
+        }
+
+        button {
+            background-color: #4a4a4a;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #6a6a6a;
+        }
+
+        .error {
+            color: #ff7c7c;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Créer un nouveau Patient</h1>
+
+    <div class="patient-actions">
+        <a href="/Patient/">Retour à la liste des patients</a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Section Informations de base -->
+        <div class="form-section">
+            <h2>Informations de base</h2>
+
+            <div class="form-group">
+                <label for="ipp">IPP:</label>
+                <input type="text" id="ipp" name="ipp" required>
+            </div>
+
+            <div class="form-group">
+                <label for="last_name">Nom de famille:</label>
+                <input type="text" id="last_name" name="last_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="first_name">Prénom:</label>
+                <input type="text" id="first_name" name="first_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="maiden_name">Nom de jeune fille:</label>
+                <input type="text" id="maiden_name" name="maiden_name">
+            </div>
+
+            <div class="form-group">
+                <label for="birth_date">Date de naissance:</label>
+                <input type="date" id="birth_date" name="birth_date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="sex">Sexe:</label>
+                <select id="sex" name="sex" required>
+                    <option value="">Sélectionner...</option>
+                    <option value="M">Masculin</option>
+                    <option value="F">Féminin</option>
+                    <option value="O">Autre</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section Coordonnées -->
+        <div class="form-section">
+            <h2>Coordonnées</h2>
+
+            <div class="form-group full-width">
+                <label for="residence_address">Adresse:</label>
+                <textarea id="residence_address" name="residence_address"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="residence_city">Ville:</label>
+                <input type="text" id="residence_city" name="residence_city">
+            </div>
+
+            <div class="form-group">
+                <label for="residence_zip_code">Code postal:</label>
+                <input type="text" id="residence_zip_code" name="residence_zip_code">
+            </div>
+
+            <div class="form-group">
+                <label for="residence_country">Pays:</label>
+                <input type="text" id="residence_country" name="residence_country">
+            </div>
+
+            <div class="form-group">
+                <label for="phone_number">Téléphone:</label>
+                <input type="text" id="phone_number" name="phone_number">
+            </div>
+        </div>
+
+        <!-- Section Lieu de naissance -->
+        <div class="form-section">
+            <h2>Lieu de naissance</h2>
+
+            <div class="form-group">
+                <label for="birth_city">Ville de naissance:</label>
+                <input type="text" id="birth_city" name="birth_city">
+            </div>
+
+            <div class="form-group">
+                <label for="birth_zip_code">Code postal de naissance:</label>
+                <input type="text" id="birth_zip_code" name="birth_zip_code">
+            </div>
+
+            <div class="form-group">
+                <label for="birth_country">Pays de naissance:</label>
+                <input type="text" id="birth_country" name="birth_country">
+            </div>
+
+            <div class="form-group">
+                <label for="birth_latitude">Latitude de naissance:</label>
+                <input type="number" step="0.000001" id="birth_latitude" name="birth_latitude">
+            </div>
+
+            <div class="form-group">
+                <label for="birth_longitude">Longitude de naissance:</label>
+                <input type="number" step="0.000001" id="birth_longitude" name="birth_longitude">
+            </div>
+        </div>
+
+        <!-- Section Décès -->
+        <div class="form-section death-info">
+            <h2 class="section-title">Informations de décès</h2>
+        
+            <div class="form-row">
+                <div class="form-group code-group">
+                    <label for="death_code" class="input-label">Code décès</label>
+                    <input type="text" id="death_code" name="death_code" maxlength="2" 
+                           class="form-input code-input">
+                </div>
+        
+                <div class="form-group datetime-group">
+                    <label for="death_date" class="input-label">Date et heure</label>
+                    <div class="datetime-input-container">
+                        <input type="datetime-local" id="death_date" name="death_date" 
+                               value="{{ patient.death_date|date:'Y-m-d\\TH:i' }}"
+                               class="form-input datetime-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Coordonnées géographiques -->
+        <div class="form-section">
+            <h2>Coordonnées géographiques de résidence</h2>
+
+            <div class="form-group">
+                <label for="residence_latitude">Latitude résidence:</label>
+                <input type="text" id="residence_latitude" name="residence_latitude">
+            </div>
+
+            <div class="form-group">
+                <label for="residence_longitude">Longitude résidence:</label>
+                <input type="text" id="residence_longitude" name="residence_longitude">
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit">Enregistrer</button>
+            <a href="/Patient/"><button type="button">Annuler</button></a>
+        </div>
+    </form>
+</body>
+
+</html>
