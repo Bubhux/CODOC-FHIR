@@ -90,10 +90,10 @@ echo ""
 #                                  SWAGGER                                     #
 ################################################################################
 echo -n "${Cyan}Checking for swagger errors / warnings.. $Color_Off"
-out=$(python3 manage.py spectacular --fail-on-warn &> /dev/null)
+out=$(python manage.py spectacular --fail-on-warn &> /dev/null)
 if [ "$?" -ne 0 ] ; then
   echo "${Red}Errors or warning found !$Color_Off"
-  echo "${Red}Run 'python3 manage.py spectacular --fail-on-warn' to display the errors !$Color_Off"
+  echo "${Red}Run 'python manage.py spectacular --fail-on-warn' to display the errors !$Color_Off"
   EXIT_CODE=1
 else
   echo "${Green}Ok ✅ $Color_Off"
@@ -105,10 +105,10 @@ echo ""
 #                                MIGRATIONS                                    #
 ################################################################################
 echo -n "${Cyan}Checking for missing migrations... $Color_Off"
-out=$(python3 manage.py makemigrations --check --dry-run --no-input &> /dev/null)
+out=$(python manage.py makemigrations --check --dry-run --no-input &> /dev/null)
 if [ "$?" -ne 0 ] ; then
   echo "${Red}migrations are missing !$Color_Off"
-  echo "${Red}Run 'python3 manage.py makemigrations' before committing !$Color_Off"
+  echo "${Red}Run 'python manage.py makemigrations' before committing !$Color_Off"
   EXIT_CODE=1
 else
   echo "${Green}Ok ✅ $Color_Off"

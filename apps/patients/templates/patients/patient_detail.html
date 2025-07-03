@@ -300,13 +300,13 @@
         <a href="/Patient/">
             <i class="fas fa-arrow-left"></i> Retour
         </a>
-        <a href="/Patient/{{ patient.id }}/edit/">
+        <a href="/Patient/{{ patient.id }}/?edit=true">
             <i class="fas fa-edit"></i> Modifier
         </a>
-        <form action="{% url 'patients:patient-detail' pk=patient.id %}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce patient ?');">
+        <form method="post" action="{% url 'patients:patient-detail' pk=patient.id %}">
             {% csrf_token %}
             <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" class="btn-delete">
+            <button type="submit" class="btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce patient ?');">
                 <i class="fas fa-trash-alt"></i> Supprimer
             </button>
         </form>

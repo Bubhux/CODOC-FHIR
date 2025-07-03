@@ -141,9 +141,8 @@
     </div>
     {% endif %}
 
-    <form method="post" action="/Patient/{{ patient.id }}/edit/">
+    <form method="post" action="/Patient/{{ patient.id }}/">
         {% csrf_token %}
-        <input type="hidden" name="_method" value="PUT">
 
         <div class="patient-info">
             <!-- Section Informations de base -->
