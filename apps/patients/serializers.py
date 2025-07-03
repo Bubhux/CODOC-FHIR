@@ -321,14 +321,16 @@ class PatientFHIRSerializer(serializers.ModelSerializer):
                                         internal_value['birth_longitude'] = str(geo_ext.get('valueDecimal')).replace(',', '.')
 
                 # Cause de décès
+                death_code_found = False
                 if data.get('extension'):
                     for ext in data['extension']:
-                        # Cause de décès
                         if ext.get('url') == 'http://hl7.org/fhir/StructureDefinition/patient-deathCause':
                             coding = ext.get('valueCodeableConcept', {}).get('coding', [{}])[0]
                             internal_value['death_code'] = coding.get('code')
-                        # Date de décès
-                        elif ext.get('url') == 'http://hl7.org/fhir/StructureDefinition/patient-deathDate':
-                            internal_value['death_date'] = ext.get('valueDateTime')
+                            death_code_found = True
 
-        return {k: v for k, v in internal_value.items() if v is not None}
+                # Si aucune extension de décès trouvée, conserver None
+                if not death_code_found:
+                    internal_value['death_code'] = None
+
+        return internal_value
