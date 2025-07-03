@@ -73,15 +73,9 @@ class Migration(migrations.Migration):
             options={
                 "db_table": "dwh_patient",
                 "indexes": [
-                    models.Index(
-                        fields=["last_name"], name="dwh_patient_last_na_362906_idx"
-                    ),
-                    models.Index(
-                        fields=["first_name"], name="dwh_patient_first_n_9c3e83_idx"
-                    ),
-                    models.Index(
-                        fields=["maiden_name"], name="dwh_patient_maiden__39d094_idx"
-                    ),
+                    models.Index(fields=["last_name"], name="dwh_patient_last_na_362906_idx"),
+                    models.Index(fields=["first_name"], name="dwh_patient_first_n_9c3e83_idx"),
+                    models.Index(fields=["maiden_name"], name="dwh_patient_maiden__39d094_idx"),
                     models.Index(fields=["ipp"], name="dwh_patient_ipp_63110c_idx"),
                 ],
             },
