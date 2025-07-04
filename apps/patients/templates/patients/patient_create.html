@@ -196,11 +196,11 @@
     <h1>Créer un nouveau Patient</h1>
 
     <div class="patient-actions">
-        <a href="/Patient/">
+        <a href="/patient/">
             <i class="fas fa-arrow-left"></i> Retour à la liste des patients
         </a>
     </div>
-    <form method="post">
+    <form method="post" action="{% url 'patients:patient-create' %}">
         {% csrf_token %}
 
         <!-- Section Informations de base -->
@@ -342,7 +342,7 @@
 
         <div class="form-actions">
             <button type="submit">Enregistrer</button>
-            <a href="/Patient/"><button type="button">Annuler</button></a>
+            <a href="{% url 'patients:patient-list' %}"><button type="button">Annuler</button></a>
         </div>
     </form>
 </body>

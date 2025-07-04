@@ -150,7 +150,7 @@
     {% endif %}
 
     <div class="patient-actions">
-        <a href="/Patient/?new=true">
+        <a href="{% url 'patients:patient-create-form' %}">
             <i class="fas fa-arrow-left"></i> Ajouter un nouveau patient
         </a>
     </div>
@@ -181,7 +181,7 @@
                     {% if patient.active %}Actif{% else %}Inactif{% endif %}
                 </td>
                 <td>
-                    <a href="/Patient/{{ patient.id }}/">Détails</a>
+                    <a href="{% url 'patients:patient-detail' patient.id %}">Détails</a>
                 </td>
             </tr>
             {% endfor %}

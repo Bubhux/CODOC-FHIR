@@ -141,7 +141,7 @@
     </div>
     {% endif %}
 
-    <form method="post" action="/Patient/{{ patient.id }}/">
+    <form method="post" action="{% url 'patients:patient-update' pk=patient.id %}">
         {% csrf_token %}
 
         <div class="patient-info">
@@ -255,7 +255,7 @@
 
         <div class="patient-actions">
             <button type="submit">Enregistrer les modifications</button>
-            <a href="/Patient/{{ patient.id }}/">Annuler</a>
+            <a href="/patient/{{ patient.id }}/">Annuler</a>
         </div>
     </form>
 </body>

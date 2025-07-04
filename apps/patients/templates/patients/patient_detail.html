@@ -297,15 +297,14 @@
     </div>
 
     <div class="patient-actions">
-        <a href="/Patient/">
+        <a href="{% url 'patients:patient-list' %}">
             <i class="fas fa-arrow-left"></i> Retour
         </a>
-        <a href="/Patient/{{ patient.id }}/?edit=true">
+        <a href="{% url 'patients:patient-edit-form' pk=patient.id %}">
             <i class="fas fa-edit"></i> Modifier
         </a>
-        <form method="post" action="{% url 'patients:patient-detail' pk=patient.id %}">
+        <form method="post" action="{% url 'patients:patient-delete' pk=patient.id %}">
             {% csrf_token %}
-            <input type="hidden" name="_method" value="DELETE">
             <button type="submit" class="btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce patient ?');">
                 <i class="fas fa-trash-alt"></i> Supprimer
             </button>
