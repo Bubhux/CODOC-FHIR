@@ -1,4 +1,5 @@
-![Static Badge](/static/badges/Python.svg)
+
+![Static Badge](/static/badges/Python.svg)   
 ![Static Badge](/static/badges/Django.svg)   
 ![Static Badge](/static/badges/Django_REST_Framework.svg)   
 ![Static Badge](/static/badges/Postman.svg) ➔ [Documentation Postman du projet CODOC FHIR](https://documenter.getpostman.com/view/26427645/2sB34ZsQWs)    
