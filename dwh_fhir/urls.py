@@ -11,10 +11,17 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from apps.patients.api_views import PatientListCreateAPIView, PatientRetrieveUpdateDestroyAPIView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("Patient/", include("apps.patients.urls")),
+    # Web interface
+    path("patient/", include("apps.patients.urls")),
+    # API endpoints
+    path("api/patient/", PatientListCreateAPIView.as_view(), name="api-patient-list"),
+    path("api/patient/<int:pk>/", PatientRetrieveUpdateDestroyAPIView.as_view(), name="api-patient-detail"),
+    # Documentation
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("", RedirectView.as_view(url="/Patient/", permanent=False)),
+    path("", RedirectView.as_view(url="/patient/", permanent=False)),
 ]

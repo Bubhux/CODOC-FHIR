@@ -1,0 +1,360 @@
+openapi: 3.0.3
+info:
+  title: Your API
+  version: 1.0.0
+  description: API description
+paths:
+  /api/patient/:
+    get:
+      operationId: patient_api_patient_list
+      description: Lister tous les patients
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - basicAuth: []
+        cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientFHIR'
+          description: ''
+    post:
+      operationId: patient_api_patient_create
+      description: Créer un nouveau patient selon le standard FHIR
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientFHIR'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - basicAuth: []
+        cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientFHIR'
+          description: ''
+  /api/patient/{id}/:
+    get:
+      operationId: patient_api_patient_retrieve
+      description: Récupérer un patient spécifique
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - basicAuth: []
+        cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientFHIR'
+          description: ''
+    put:
+      operationId: patient_api_patient_update
+      description: Mettre à jour complètement un patient
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientFHIR'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - basicAuth: []
+        cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientFHIR'
+          description: ''
+    delete:
+      operationId: patient_api_patient_delete
+      description: Supprimer un patient
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - basicAuth: []
+        cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    PatientFHIR:
+      type: object
+      description: |-
+        Sérialiseur pour transformer les données Patient au format FHIR.
+
+        Ce sérialiseur convertit les données du modèle Patient Django en ressource FHIR Patient,
+        conformément au standard HL7 FHIR STU3/R4.
+      properties:
+        resourceType:
+          type: string
+          readOnly: true
+          default: Patient
+        id:
+          type: string
+          readOnly: true
+        identifier:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+          description: |-
+            Génère l'identifiant FHIR du patient (IPP).
+
+            Args:
+                obj: Instance du modèle Patient
+
+            Returns
+            -------
+            list
+                Liste contenant un dictionnaire avec le système et la valeur IPP
+          readOnly: true
+        active:
+          type: boolean
+          readOnly: true
+          default: true
+        name:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: |-
+            Construit le nom du patient au format FHIR.
+
+            Args:
+                obj: Instance du modèle Patient
+
+            Returns
+            -------
+            list
+                Liste contenant un dictionnaire avec les composants du nom
+          readOnly: true
+        telecom:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+          description: |-
+            Récupère les coordonnées de contact au format FHIR.
+
+            Args
+            ----
+            obj : Patient
+                Instance du modèle Patient
+
+            Returns
+            -------
+            List[Dict[str, str]]
+                Liste des moyens de contact (téléphone, email)
+          readOnly: true
+        gender:
+          type: string
+          description: |-
+            Convertit le sexe du patient en code FHIR.
+
+            Args:
+                obj: Instance du modèle Patient
+
+            Returns
+            -------
+            str
+                Code FHIR parmi ('male', 'female', 'other', 'unknown')
+          readOnly: true
+        birthDate:
+          type: string
+          nullable: true
+          description: |-
+            Récupère la date de naissance au format FHIR (YYYY-MM-DD).
+
+            Args:
+                obj: Instance du modèle Patient
+
+            Returns
+            -------
+            Optional[str]
+                Date formatée en YYYY-MM-DD ou None si non définie
+          readOnly: true
+        deceasedDateTime:
+          type: string
+          nullable: true
+          description: |-
+            Récupère la date de décès au format FHIR.
+
+            Args:
+                obj: Instance du modèle Patient
+
+            Returns
+            -------
+            Optional[str]
+                Date formatée ou None si non définie
+          readOnly: true
+        address:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: |-
+            Construit l'adresse du patient au format FHIR.
+
+            Args
+            ----
+            obj : Patient
+                Instance du modèle Patient
+
+            Returns
+            -------
+            List[Dict[str, Any]]
+                Liste contenant un dictionnaire avec les composants de l'adresse
+          readOnly: true
+        maritalStatus:
+          type: string
+          nullable: true
+          readOnly: true
+        multipleBirthBoolean:
+          type: boolean
+          nullable: true
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        contact:
+          type: array
+          items: {}
+          description: |-
+            Méthode pour les contacts (non implémentée).
+
+            Args
+            ----
+            obj : Patient
+                Instance du modèle Patient
+
+            Returns
+            -------
+            List[Any]
+                Liste vide car non implémenté
+          readOnly: true
+        communication:
+          type: array
+          items: {}
+          description: |-
+            Méthode pour les préférences de communication (non implémentée).
+
+            Args
+            ----
+            obj : Patient
+                Instance du modèle Patient
+
+            Returns
+            -------
+            List[Any]
+                Liste vide car non implémenté
+          readOnly: true
+        generalPractitioner:
+          type: array
+          items: {}
+          description: |-
+            Méthode pour le médecin traitant (non implémentée).
+
+            Args
+            ----
+            obj : Patient
+                Instance du modèle Patient
+
+            Returns
+            -------
+            List[Any]
+                Liste vide car non implémenté
+          readOnly: true
+        managingOrganization:
+          type: string
+          nullable: true
+          readOnly: true
+        link:
+          type: array
+          items: {}
+          description: |-
+            Méthode pour les liens vers autres ressources (non implémentée).
+
+            Args
+            ----
+            obj : Patient
+                Instance du modèle Patient
+
+            Returns
+            -------
+            List[Any]
+                Liste vide car non implémenté
+          readOnly: true
+        extension:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          nullable: true
+          description: |-
+            Génère les extensions FHIR personnalisées.
+
+            Args:
+                obj: Instance du modèle Patient
+
+            Returns
+            -------
+            Optional[List[Dict[str, Any]]]
+                Liste des extensions FHIR ou None si aucune extension
+          readOnly: true
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
