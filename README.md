@@ -85,7 +85,7 @@ Le projet sépare clairement les interfaces Web et **API** **REST** dans des fic
 #### Fonctionnalités communes
 
 - **Validation FHIR** intégrée dans les deux interfaces
-- **Sérialisation/désérialisation** via ``serializers.py`` ➔ ([serializers.py](apps/patients/serializers.py)) partagé.
+- **Sérialisation/désérialisation** via ``serializers.py`` ➔ ([serializers.py](apps/patients/serializers.py)).
 
 #### En-têtes FHIR supportés
 
