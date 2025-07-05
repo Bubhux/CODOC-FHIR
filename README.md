@@ -224,7 +224,7 @@ $ python manage.py createsuperuser
 
 ### Interface de l'application     
 
-L'interface de l'application fonctionne sur une page web.   
+L'application posséde une interface web qui fonctionne avec `web_views.py` ➔ ([web_views.py](apps/patients/web_views.py)).   
 
 #### Affiche tous les patients.   
 
