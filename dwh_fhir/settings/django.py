@@ -142,15 +142,6 @@ LOGGING = {
     },
     "loggers": {
         **{app: {"handlers": ["console", "debug_console"], "level": "DEBUG"} for app in PROJECT_APPS},
-        "django": {
-            "handlers": ["console", "debug_console"],
-            "level": "DEBUG" if DEBUG else "INFO",
-        },
-        "django.request": {
-            "handlers": ["console", "debug_console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
     },
 }
 

@@ -6,7 +6,6 @@ from .web_views import PatientHTMLView
 web_view = PatientHTMLView()
 app_name = "patients"
 
-# Supprimer les URLs API de ce fichier, elles sont maintenant dans dwh_fhir/urls.py
 urlpatterns = [
     # Web Interface seulement
     path("", web_view.list_patients, name="patient-list"),
