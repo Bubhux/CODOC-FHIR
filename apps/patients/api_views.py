@@ -58,7 +58,7 @@ class PatientListCreateAPIView(APIView):
 
     @extend_schema(operation_id="patient_api_patient_list", description="Lister tous les patients")
     def get(self, request: Request) -> Response:
-        """Lister tous les patients (implémentez selon vos besoins)."""
+        """Lister tous les patients."""
         patients = Patient.objects.all()
         serializer = self.serializer_class(patients, many=True)
         return Response(serializer.data)
