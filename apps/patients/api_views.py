@@ -20,14 +20,40 @@ class PatientListCreateAPIView(APIView):
     )
     def post(self, request: Request) -> Response:
         """Créer un nouveau patient selon le standard FHIR."""
+        # Vérification du resourceType
+        if not request.data.get("resourceType") == "Patient":
+            return Response({"error": "resourceType must be 'Patient'"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Gestion de If-None-Exist
+        if_none_exist = request.headers.get("If-None-Exist")
+        if if_none_exist:
+            ipp = next(
+                (
+                    id["value"]
+                    for id in request.data.get("identifier", [])
+                    if id.get("system") == "urn:oid:1.2.250.1.213.1.4.8"
+                ),
+                None,
+            )
+            if ipp and Patient.objects.filter(ipp=ipp).exists():
+                return Response(
+                    {"error": "Patient already exists with this IPP"}, status=status.HTTP_412_PRECONDITION_FAILED
+                )
+
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED,
-                headers={"Location": f"/patient/{serializer.instance.id}/"},
-            )
+            patient = serializer.save()
+
+            # Gestion de Prefer header
+            prefer = request.headers.get("Prefer", "return=minimal")
+            if prefer == "return=representation":
+                response_data = self.serializer_class(patient).data
+                return Response(
+                    response_data, status=status.HTTP_201_CREATED, headers={"Location": f"/patient/{patient.id}/"}
+                )
+            else:
+                return Response(status=status.HTTP_201_CREATED, headers={"Location": f"/patient/{patient.id}/"})
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(operation_id="patient_api_patient_list", description="Lister tous les patients")
