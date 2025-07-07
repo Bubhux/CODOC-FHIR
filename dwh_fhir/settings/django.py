@@ -177,7 +177,7 @@ SPECTACULAR_SETTINGS = {
     ],
     "COMPONENT_NO_READ_ONLY_REQUIRED": True,
     "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
-    "TITLE": "Your API",
+    "TITLE": "CODOC FHIR API",
     "DESCRIPTION": "API description",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
