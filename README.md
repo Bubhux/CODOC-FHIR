@@ -222,7 +222,7 @@ $ python manage.py createsuperuser
 <div id="interface-application"></div>
 <a href="#top" style="float: right;">Retour en haut 🡅</a>
 
-### Interface de l'application     
+### Interface de l'application & drf_spectacular     
 
 L'application posséde une interface web qui fonctionne avec `web_views.py` ➔ ([web_views.py](apps/patients/web_views.py)).   
 
