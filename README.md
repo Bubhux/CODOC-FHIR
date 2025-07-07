@@ -244,7 +244,6 @@ L'application posséde une interface web qui fonctionne avec `web_views.py` ➔ 
 
 ![Display create patient](/static/img/screen_create_patient.png)   
 
-
 ##### Mise à jour et suppression d'un patient.   
 
 * Disponible à l'adresse ➔ http://127.0.0.1:8000/patient/edit/   
