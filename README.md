@@ -17,7 +17,7 @@
 5. **[Activation environnement](#activation-environnement)**   
 6. **[Installation des librairies](#installation-librairies)**   
 7. **[Administration opérations CRUD et gestionnaires de commmandes](#administration-bdd)**   
-8. **[Interface de l'application](#interface-application)**   
+8. **[Interface de l'application & drf_spectacular](#interface-application)**   
 9. **[Exécution de l'application](#execution-application)**      
 10. **[Rapport avec le fichier pre_commit.sh](#rapport-pre_commit)**   
 11. **[Informations importantes sur les différents fichiers et dossiers](#informations-importantes)**   
@@ -250,6 +250,12 @@ L'application posséde une interface web qui fonctionne avec `web_views.py` ➔ 
 * Disponible à l'adresse ➔ http://127.0.0.1:8000/patient/edit/   
 
 ![Display edit patient](/static/img/screen_update_patient.png)   
+
+##### Documentation drf_spectacular.   
+
+* Disponible à l'adresse ➔ http://127.0.0.1:8000/api/docs/  
+
+![Display drf_spectacular](/static/img/screen_drf_spectacular.png)   
 
 --------------------------------------------------------------------------------------------------------------------------------
 
