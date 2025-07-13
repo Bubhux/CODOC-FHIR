@@ -25,20 +25,22 @@ class PatientListCreateAPIView(APIView):
             return Response({"error": "resourceType must be 'Patient'"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Gestion de If-None-Exist
-        if_none_exist = request.headers.get("If-None-Exist")
-        if if_none_exist:
-            ipp = next(
-                (
-                    id["value"]
-                    for id in request.data.get("identifier", [])
-                    if id.get("system") == "urn:oid:1.2.250.1.213.1.4.8"
-                ),
-                None,
-            )
-            if ipp and Patient.objects.filter(ipp=ipp).exists():
+        ipp = next(
+            (
+                id["value"]
+                for id in request.data.get("identifier", [])
+                if id.get("system") == "urn:oid:1.2.250.1.213.1.4.8"
+            ),
+            None,
+        )
+        if ipp and Patient.objects.filter(ipp=ipp).exists():
+            if_none_exist = request.headers.get("If-None-Exist")
+            if if_none_exist:
                 return Response(
                     {"error": "Patient already exists with this IPP"}, status=status.HTTP_412_PRECONDITION_FAILED
                 )
+            else:
+                return Response({"error": "A patient with this IPP already exists"}, status=status.HTTP_409_CONFLICT)
 
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
